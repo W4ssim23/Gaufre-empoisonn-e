@@ -5,10 +5,6 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 
-/**
- * Panneau de configuration intégré dans la fenêtre principale.
- * Remplace ConfigDialog pour éviter l'ouverture/fermeture de fenêtre.
- */
 public class ConfigPanel extends JPanel {
 
     public interface ConfigListener {
@@ -132,7 +128,7 @@ public class ConfigPanel extends JPanel {
         b.setTitleFont(new Font("Segoe UI", Font.BOLD, 13));
         b.setTitleColor(ACCENT);
         p.setBorder(BorderFactory.createCompoundBorder(b, new EmptyBorder(8, 8, 8, 8)));
-        p.setAlignmentX(LEFT_ALIGNMENT);
+        p.setAlignmentX(CENTER_ALIGNMENT);
         p.setMaximumSize(new Dimension(450, 200));
         return p;
     }

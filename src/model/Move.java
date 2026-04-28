@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 /**
  * Représente un coup joué dans le jeu de la Gaufre.
- * Stocke la position (row, col) et le joueur qui l'a effectué.
  */
 public class Move implements Serializable {
     private static final long serialVersionUID = 1L;

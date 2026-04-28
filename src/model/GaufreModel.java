@@ -4,13 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Modèle principal de la Gaufre Empoisonnée (Chomp).
- * 
- * La gaufre est une grille N×M. La case (0,0) est empoisonnée (poison).
- * Lorsqu'un joueur clique sur (r,c), toutes les cases (i,j) avec i≥r et j≥c sont mangées.
- * Le joueur qui mange la case (0,0) a perdu.
- */
 public class GaufreModel implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -35,9 +28,6 @@ public class GaufreModel implements Serializable {
         reset();
     }
 
-    /**
-     * Réinitialise le plateau à son état initial.
-     */
     public void reset() {
         grid = new boolean[rows][cols];
         for (int i = 0; i < rows; i++) {
@@ -51,28 +41,21 @@ public class GaufreModel implements Serializable {
         fireModelChanged();
     }
 
-    /**
-     * Applique un coup : mange toutes les cases (i,j) avec i≥row et j≥col.
-     * Ne vérifie PAS la validité - utilisé en interne par MoveCommand.
-     */
     public void applyMove(Move move) {
         int r = move.getRow();
         int c = move.getCol();
 
-        // Si on mange (0,0), le joueur courant perd
         if (r == 0 && c == 0) {
             gameOver = true;
             loser = move.getPlayer();
         }
 
-        // Manger toutes les cases (i,j) avec i ≥ r et j ≥ c
         for (int i = r; i < rows; i++) {
             for (int j = c; j < cols; j++) {
                 grid[i][j] = false;
             }
         }
 
-        // Changer de joueur
         currentPlayer = (move.getPlayer() == 1) ? 2 : 1;
 
         fireModelChanged();
@@ -81,9 +64,6 @@ public class GaufreModel implements Serializable {
         }
     }
 
-    /**
-     * Restaure un état complet (utilisé par Undo).
-     */
     public void restoreState(boolean[][] savedGrid, int player, boolean wasGameOver, int wasLoser) {
         for (int i = 0; i < rows; i++) {
             System.arraycopy(savedGrid[i], 0, grid[i], 0, cols);
@@ -94,40 +74,29 @@ public class GaufreModel implements Serializable {
         fireModelChanged();
     }
 
-    /**
-     * Vérifie si un coup est valide.
-     */
     public boolean isValidMove(int row, int col) {
         if (gameOver) return false;
         if (row < 0 || row >= rows || col < 0 || col >= cols) return false;
-        return grid[row][col]; // La case doit être encore présente
+        return grid[row][col];
     }
 
-    /**
-     * Retourne tous les coups valides.
-     */
     public List<Move> getValidMoves() {
         List<Move> moves = new ArrayList<>();
         if (gameOver) return moves;
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 if (grid[i][j]) {
-                    // Ne pas inclure (0,0) sauf si c'est le seul coup possible
                     if (i == 0 && j == 0) continue;
                     moves.add(new Move(i, j, currentPlayer));
                 }
             }
         }
-        // Si aucun coup hors (0,0), il faut manger le poison
         if (moves.isEmpty() && grid[0][0]) {
             moves.add(new Move(0, 0, currentPlayer));
         }
         return moves;
     }
 
-    /**
-     * Vérifie si seule la case empoisonnée (0,0) reste.
-     */
     public boolean isOnlyPoisonLeft() {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -139,9 +108,6 @@ public class GaufreModel implements Serializable {
         return grid[0][0];
     }
 
-    /**
-     * Crée une copie profonde de la grille.
-     */
     public boolean[][] copyGrid() {
         boolean[][] copy = new boolean[rows][cols];
         for (int i = 0; i < rows; i++) {
@@ -150,9 +116,6 @@ public class GaufreModel implements Serializable {
         return copy;
     }
 
-    /**
-     * Vérifie si une case est présente.
-     */
     public boolean isCellPresent(int row, int col) {
         if (row < 0 || row >= rows || col < 0 || col >= cols) return false;
         return grid[row][col];

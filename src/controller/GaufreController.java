@@ -7,11 +7,6 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 
-/**
- * Contrôleur principal du jeu de la Gaufre Empoisonnée (pattern MVC).
- * Orchestre les interactions entre le Modèle et la Vue.
- * Gère : coups, undo/redo, IA, sauvegarde/chargement, nouvelle partie.
- */
 public class GaufreController {
 
     private GaufreModel model;
@@ -51,6 +46,7 @@ public class GaufreController {
 
     private void handleCellClick(int row, int col) {
         if (model.isGameOver() || aiThinking) return;
+        if (view.getBoardPanel().isAnimating()) return;
         if (config.isVsAI() && model.getCurrentPlayer() == config.getAiPlayer()) return;
         if (!model.isValidMove(row, col)) return;
 
@@ -63,6 +59,9 @@ public class GaufreController {
     }
 
     private void playMove(int row, int col) {
+        boolean[][] gridBefore = model.copyGrid();
+        view.getBoardPanel().triggerDestructionAnimation(row, col, gridBefore);
+
         Move move = new Move(row, col, model.getCurrentPlayer());
         MoveCommand command = new MoveCommand(move, model);
         history.executeCommand(command, model);
@@ -72,10 +71,16 @@ public class GaufreController {
     private void playAIMove() {
         if (model.isGameOver()) return;
         aiThinking = true;
+        view.setAIThinkingState(true);
         view.getBoardPanel().setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.WAIT_CURSOR));
         SwingWorker<Move, Void> worker = new SwingWorker<Move, Void>() {
             @Override
             protected Move doInBackground() {
+                try {
+                    // Attente artificielle 
+                    long delay = 2000 + (long)(Math.random() * 2000);
+                    Thread.sleep(delay);
+                } catch (InterruptedException ignored) {}
                 return aiPlayer.findBestMove(model);
             }
 
@@ -90,6 +95,7 @@ public class GaufreController {
                     ex.printStackTrace();
                 } finally {
                     aiThinking = false;
+                    view.setAIThinkingState(false);
                     view.getBoardPanel().setCursor(java.awt.Cursor.getDefaultCursor());
                 }
             }
@@ -97,10 +103,6 @@ public class GaufreController {
         worker.execute();
     }
 
-    /**
-     * Annule le dernier coup (Undo).
-     * En mode IA, annule 2 coups (le coup de l'IA + le coup du joueur).
-     */
     private void handleUndo() {
         if (aiThinking) return;
         if (!history.canUndo()) return;
@@ -116,10 +118,6 @@ public class GaufreController {
         updateButtonStates();
     }
 
-    /**
-     * Refait le dernier coup annulé (Redo).
-     * En mode IA, refait 2 coups.
-     */
     private void handleRedo() {
         if (aiThinking) return;
         if (!history.canRedo()) return;
