@@ -13,6 +13,7 @@ public class AIPlayer {
         this.random = new Random();
     }
 
+    // find all good moves and select a random one of them
     public Move findBestMove(GaufreModel model) {
         List<Move> validMoves = model.getValidMoves();
         if (validMoves.isEmpty()) {
@@ -24,7 +25,7 @@ public class AIPlayer {
             return validMoves.get(0);
         }
 
-        memo.clear();
+        memo.clear(); 
 
         List<Move> winningMoves = new ArrayList<>();
         List<Move> allMoves = new ArrayList<>(validMoves);
@@ -40,20 +41,17 @@ public class AIPlayer {
             // Évaluer la position résultante pour l'adversaire
             int score = minimax(newGrid, rows, cols);
 
-            if (score == -1) { // si l’adversaire perd → coup gagnant
+            if (score == -1) { // si l’adversaire perd → coup gagnant 
                 winningMoves.add(move);
             }
         }
 
-        // Si des coups gagnants existent, en choisir un aléatoirement
         if (!winningMoves.isEmpty()) {
             return winningMoves.get(random.nextInt(winningMoves.size()));
         }
 
-        // try to make the game as long as possible
         return chooseBestLosingMove(allMoves, grid, rows, cols, model.getCurrentPlayer());
     }
-
 
 
     private int minimax(boolean[][] grid, int rows, int cols) {
@@ -65,7 +63,7 @@ public class AIPlayer {
             return memo.get(key);
         }
 
-        // terminal position: only poison left => current player loses
+        // terminal position : only poison left => current player loses
         if (isOnlyPoison(grid, rows, cols)) {
             memo.put(key, -1);
             return -1;
@@ -73,7 +71,7 @@ public class AIPlayer {
 
         List<int[]> moves = getValidMovesFromGrid(grid, rows, cols);
 
-        // try all moves and if ANY move leads to a losing position it's winning
+        // try all moves if ANY move leads to a losing position it's winning
         for (int[] move : moves) {
             boolean[][] newGrid = applyMoveToGrid(grid, move[0], move[1], rows, cols);
 
@@ -93,8 +91,6 @@ public class AIPlayer {
 
     //if there is no wining moves, just make the game longer so we can increase the chance of the player fambling
     private Move chooseBestLosingMove(List<Move> moves, boolean[][] grid, int rows, int cols, int player) {
-        // Trier par nombre de cellules restantes (décroissant)
-
         List<Move> bestMoves = new ArrayList<>();
         int maxCells = -1;
 

@@ -4,11 +4,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Gère la persistance du jeu (sauvegarde et chargement).
- * Utilise la sérialisation Java pour sauvegarder l'état complet
- * du plateau ET l'historique des coups (Undo/Redo).
- */
 public class GamePersistence {
 
     public static class SaveData implements Serializable {
@@ -47,9 +42,6 @@ public class GamePersistence {
         }
     }
 
-    /**
-     * Charge l'état complet du jeu depuis un fichier.
-     */
     public static SaveData load(File file) throws IOException, ClassNotFoundException {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
             return (SaveData) ois.readObject();

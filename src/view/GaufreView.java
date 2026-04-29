@@ -61,7 +61,6 @@ public class GaufreView extends JFrame implements GaufreModel.ModelListener {
         JPanel panel = new JPanel(new BorderLayout(0, 0));
         panel.setBackground(BG);
 
-        // Header
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(PANEL_BG);
         header.setBorder(new EmptyBorder(12, 20, 12, 20));
@@ -83,51 +82,97 @@ public class GaufreView extends JFrame implements GaufreModel.ModelListener {
         boardPanel.setBackground(new Color(250, 245, 235));
         panel.add(boardPanel, BorderLayout.CENTER);
 
-        // Separator + Footer
         JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
         separator.setForeground(new Color(80, 80, 100));
         separator.setBackground(PANEL_BG);
 
-        JPanel footer = new JPanel(new BorderLayout());
-        footer.setBackground(PANEL_BG);
-        footer.setBorder(new EmptyBorder(10, 15, 10, 15));
+        JPanel controlBar = new JPanel(new GridBagLayout());
+        controlBar.setBackground(PANEL_BG);
+        controlBar.setBorder(new EmptyBorder(10, 20, 10, 20));
 
-        JPanel leftBtns = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
-        leftBtns.setBackground(PANEL_BG);
         undoBtn = makeBtn("Annuler", new Color(100, 160, 220));
         redoBtn = makeBtn("Refaire", new Color(100, 160, 220));
-        leftBtns.add(undoBtn);
-        leftBtns.add(redoBtn);
 
-        JPanel centerInfo = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
-        centerInfo.setBackground(PANEL_BG);
+        saveBtn = makeBtn("Sauvegarder", new Color(80, 170, 120));
+        loadBtn = makeBtn("Charger", new Color(80, 170, 120));
+
+        newGameBtn = makeBtn("Nouvelle Partie", ACCENT);
+        newGameBtn.setForeground(BG);
+
         moveCountLabel = new JLabel("Coups: 0");
         moveCountLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         moveCountLabel.setForeground(new Color(150, 150, 170));
-        centerInfo.add(moveCountLabel);
 
-        JPanel rightBtns = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        rightBtns.setBackground(PANEL_BG);
-        saveBtn = makeBtn("Sauvegarder", new Color(80, 170, 120));
-        loadBtn = makeBtn("Charger", new Color(80, 170, 120));
-        newGameBtn = makeBtn("Nouvelle Partie", ACCENT);
-        newGameBtn.setForeground(BG);
-        rightBtns.add(saveBtn);
-        rightBtns.add(loadBtn);
-        rightBtns.add(newGameBtn);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridy = 0;
+        gbc.gridx = 0;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
+        
+        Insets normalInsets = new Insets(0, 5, 0, 5);
+        Insets sepInsets = new Insets(0, 15, 0, 15);
 
-        footer.add(leftBtns, BorderLayout.WEST);
-        footer.add(centerInfo, BorderLayout.CENTER);
-        footer.add(rightBtns, BorderLayout.EAST);
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        controlBar.add(Box.createHorizontalGlue(), gbc);
+        
+        gbc.weightx = 0.0;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.gridx++;
+
+        gbc.insets = normalInsets;
+        controlBar.add(undoBtn, gbc);
+        gbc.gridx++;
+        controlBar.add(redoBtn, gbc);
+        gbc.gridx++;
+
+        gbc.insets = sepInsets;
+        controlBar.add(makeVerticalSeparator(), gbc);
+        gbc.gridx++;
+
+        gbc.insets = normalInsets;
+        controlBar.add(saveBtn, gbc);
+        gbc.gridx++;
+        controlBar.add(loadBtn, gbc);
+        gbc.gridx++;
+
+        gbc.insets = sepInsets;
+        controlBar.add(makeVerticalSeparator(), gbc);
+        gbc.gridx++;
+
+        gbc.insets = normalInsets;
+        controlBar.add(moveCountLabel, gbc);
+        gbc.gridx++;
+
+        gbc.insets = sepInsets;
+        controlBar.add(makeVerticalSeparator(), gbc);
+        gbc.gridx++;
+
+        gbc.insets = normalInsets;
+        controlBar.add(newGameBtn, gbc);
+        
+        gbc.gridx++;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        controlBar.add(Box.createHorizontalGlue(), gbc);
+
 
         JPanel bottomPanel = new JPanel(new BorderLayout(0, 0));
         bottomPanel.setBackground(PANEL_BG);
         bottomPanel.add(separator, BorderLayout.NORTH);
-        bottomPanel.add(footer, BorderLayout.CENTER);
+        bottomPanel.add(controlBar, BorderLayout.CENTER);
 
         panel.add(bottomPanel, BorderLayout.SOUTH);
 
         return panel;
+    }
+
+    private JSeparator makeVerticalSeparator() {
+        JSeparator sep = new JSeparator(SwingConstants.VERTICAL);
+        sep.setForeground(new Color(80, 80, 100));
+        sep.setMaximumSize(new Dimension(2, 28));
+        sep.setPreferredSize(new Dimension(2, 28));
+        return sep;
     }
 
     private JButton makeBtn(String text, Color bg) {
@@ -157,8 +202,6 @@ public class GaufreView extends JFrame implements GaufreModel.ModelListener {
         cardLayout.show(cardPanel, CARD_GAME);
     }
 
-    // === Accesseurs ===
-
     public ConfigPanel getConfigPanel() { return configPanel; }
     public BoardPanel getBoardPanel() { return boardPanel; }
     public JButton getUndoBtn() { return undoBtn; }
@@ -180,19 +223,34 @@ public class GaufreView extends JFrame implements GaufreModel.ModelListener {
         moveCountLabel.setText("Coups: " + count);
     }
 
+    public void setAIThinkingState(boolean thinking) {
+        if (thinking) {
+            statusLabel.setText("L'IA est en train de réfléchir...");
+            statusLabel.setForeground(ACCENT);
+        } else {
+            onModelChanged();
+        }
+    }
+
     public void showGameOver(int loser) {
         String winner;
+        String boardMsg;
         if (config.isVsAI()) {
-            winner = (loser == config.getAiPlayer()) ? "Vous avez gagne !" : "L'IA a gagne !";
+            if (loser == config.getAiPlayer()) {
+                winner = "Vous avez gagné !";
+                boardMsg = "Tu as gagné !";
+            } else {
+                winner = "L'IA a gagné !";
+                boardMsg = "Tu as perdu !";
+            }
         } else {
-            winner = "Joueur " + (loser == 1 ? "2" : "1") + " a gagne !";
+            winner = "Joueur " + (loser == 1 ? "2" : "1") + " a gagné !";
+            boardMsg = winner;
         }
         statusLabel.setText("Fin - " + winner);
         statusLabel.setForeground(ACCENT);
-
-        JOptionPane.showMessageDialog(this,
-            "Le Joueur " + loser + " a mange le poison !\n" + winner,
-            "Fin de Partie", JOptionPane.INFORMATION_MESSAGE);
+        
+        boardPanel.setGameOverMessage(boardMsg);
     }
 
 
@@ -212,6 +270,7 @@ public class GaufreView extends JFrame implements GaufreModel.ModelListener {
             }
             statusLabel.setText("Tour: " + name + " (J" + cp + ")");
             statusLabel.setForeground(cp == 1 ? P1_COLOR : P2_COLOR);
+            boardPanel.setGameOverMessage(null);
         }
         this.boardPanel.repaint();
     }

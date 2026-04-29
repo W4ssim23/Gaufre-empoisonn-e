@@ -82,7 +82,7 @@ public class GaufreModel implements Serializable {
     public boolean isValidMove(int row, int col) {
         if (gameOver) return false;
         if (row < 0 || row >= rows || col < 0 || col >= cols) return false;
-        return grid[row][col]; // La case doit être encore présente
+        return grid[row][col];
     }
 
 
@@ -92,13 +92,11 @@ public class GaufreModel implements Serializable {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 if (grid[i][j]) {
-                    // Ne pas inclure (0,0) sauf si c'est le seul coup possible
                     if (i == 0 && j == 0) continue;
                     moves.add(new Move(i, j, currentPlayer));
                 }
             }
         }
-        // Si aucun coup hors (0,0), il faut manger le poison
         if (moves.isEmpty() && grid[0][0]) {
             moves.add(new Move(0, 0, currentPlayer));
         }

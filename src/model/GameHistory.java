@@ -7,7 +7,6 @@ import java.util.Stack;
 
 /**
  * Gère l'historique complet des coups avec deux piles (Undo/Redo).
- * Permet d'annuler et de refaire des coups sans limite.
  */
 public class GameHistory implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -20,10 +19,6 @@ public class GameHistory implements Serializable {
         redoStack = new Stack<>();
     }
 
-    /**
-     * Exécute une commande et l'ajoute à l'historique.
-     * Vide la pile Redo (un nouveau coup invalide les coups refaits).
-     */
     public void executeCommand(MoveCommand command, GaufreModel model) {
         command.execute(model);
         undoStack.push(command);
@@ -66,9 +61,6 @@ public class GameHistory implements Serializable {
         return !redoStack.isEmpty();
     }
 
-    /**
-     * Réinitialise l'historique complet.
-     */
     public void clear() {
         undoStack.clear();
         redoStack.clear();
@@ -88,9 +80,6 @@ public class GameHistory implements Serializable {
         return new ArrayList<>(redoStack);
     }
 
-    /**
-     * Restaure l'historique depuis des listes sauvegardées.
-     */
     public void restore(List<MoveCommand> undoCommands, List<MoveCommand> redoCommands) {
         undoStack.clear();
         redoStack.clear();
