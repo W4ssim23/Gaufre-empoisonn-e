@@ -16,10 +16,14 @@ public class ConfigPanel extends JPanel {
     private JPanel aiOptionsPanel;
     private ConfigListener listener;
 
-    private static final Color BG = new Color(35, 35, 45);
-    private static final Color PANEL_BG = new Color(55, 55, 70);
-    private static final Color ACCENT = new Color(235, 195, 80);
-    private static final Color TXT = new Color(230, 230, 240);
+    // Catppuccin Macchiato inspired palette
+    private static final Color BG = new Color(36, 39, 58); // Mocha Base
+    private static final Color PANEL_BG = new Color(49, 50, 68); // Surface0
+    private static final Color ACCENT = new Color(249, 226, 175); // Yellow
+    private static final Color ACCENT_HOVER = new Color(242, 205, 132); // Darker Yellow
+    private static final Color TXT_MAIN = new Color(205, 214, 244); // Text
+    private static final Color TXT_SEC = new Color(166, 173, 200); // Subtext0
+    private static final Color BORDER_C = new Color(69, 71, 90); // Surface1
 
     public ConfigPanel() {
         setBackground(BG);
@@ -28,58 +32,59 @@ public class ConfigPanel extends JPanel {
         JPanel inner = new JPanel();
         inner.setLayout(new BoxLayout(inner, BoxLayout.Y_AXIS));
         inner.setBackground(BG);
-        inner.setBorder(new EmptyBorder(30, 40, 30, 40));
+        inner.setBorder(new EmptyBorder(40, 50, 40, 50));
 
-        JLabel title = new JLabel("Gaufre Empoisonnee");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        JLabel title = new JLabel("Gaufre Empoisonnée");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 32));
         title.setForeground(ACCENT);
         title.setAlignmentX(CENTER_ALIGNMENT);
         inner.add(title);
 
         JLabel subtitle = new JLabel("Configuration de la partie");
-        subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        subtitle.setForeground(new Color(150, 150, 170));
+        subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        subtitle.setForeground(TXT_SEC);
         subtitle.setAlignmentX(CENTER_ALIGNMENT);
+        subtitle.setBorder(new EmptyBorder(5, 0, 30, 0));
         inner.add(subtitle);
-        inner.add(Box.createVerticalStrut(25));
 
         // Taille
-        JPanel sizeP = styledPanel("Taille de la grille");
-        sizeP.setLayout(new GridBagLayout());
+        JPanel sizeContent = new JPanel(new GridBagLayout());
         GridBagConstraints g = new GridBagConstraints();
-        g.insets = new Insets(4, 8, 4, 8);
+        g.insets = new Insets(8, 12, 8, 12);
         g.anchor = GridBagConstraints.WEST;
         g.gridx = 0; g.gridy = 0;
-        sizeP.add(lbl("Lignes (N):"), g);
+        sizeContent.add(lbl("Lignes (N):"), g);
         g.gridx = 1;
         rowsSpinner = spinner(5, 2, 10);
-        sizeP.add(rowsSpinner, g);
+        sizeContent.add(rowsSpinner, g);
         g.gridx = 0; g.gridy = 1;
-        sizeP.add(lbl("Colonnes (M):"), g);
+        sizeContent.add(lbl("Colonnes (M):"), g);
         g.gridx = 1;
         colsSpinner = spinner(7, 2, 12);
-        sizeP.add(colsSpinner, g);
-        inner.add(sizeP);
-        inner.add(Box.createVerticalStrut(12));
+        sizeContent.add(colsSpinner, g);
+        inner.add(styledPanel("Taille de la grille", sizeContent));
+        inner.add(Box.createVerticalStrut(20));
 
         // Mode
-        JPanel modeP = styledPanel("Mode de jeu");
-        modeP.setLayout(new BoxLayout(modeP, BoxLayout.Y_AXIS));
+        JPanel modeContent = new JPanel();
+        modeContent.setLayout(new BoxLayout(modeContent, BoxLayout.Y_AXIS));
+        modeContent.setBorder(new EmptyBorder(0, 15, 15, 15));
         humanVsHuman = radio("Humain vs Humain");
         humanVsAI = radio("Humain vs IA");
         humanVsAI.setSelected(true);
         ButtonGroup mg = new ButtonGroup();
         mg.add(humanVsHuman);
         mg.add(humanVsAI);
-        modeP.add(humanVsHuman);
-        modeP.add(Box.createVerticalStrut(4));
-        modeP.add(humanVsAI);
-        inner.add(modeP);
-        inner.add(Box.createVerticalStrut(12));
+        modeContent.add(humanVsHuman);
+        modeContent.add(Box.createVerticalStrut(8));
+        modeContent.add(humanVsAI);
+        inner.add(styledPanel("Mode de jeu", modeContent));
+        inner.add(Box.createVerticalStrut(20));
 
         // Options IA
-        aiOptionsPanel = styledPanel("Options IA");
+        aiOptionsPanel = new JPanel();
         aiOptionsPanel.setLayout(new BoxLayout(aiOptionsPanel, BoxLayout.Y_AXIS));
+        aiOptionsPanel.setBorder(new EmptyBorder(0, 15, 15, 15));
         humanStarts = radio("L'humain commence");
         aiStarts = radio("L'IA commence");
         humanStarts.setSelected(true);
@@ -87,19 +92,20 @@ public class ConfigPanel extends JPanel {
         sg.add(humanStarts);
         sg.add(aiStarts);
         aiOptionsPanel.add(humanStarts);
-        aiOptionsPanel.add(Box.createVerticalStrut(4));
+        aiOptionsPanel.add(Box.createVerticalStrut(8));
         aiOptionsPanel.add(aiStarts);
-        inner.add(aiOptionsPanel);
-        inner.add(Box.createVerticalStrut(25));
+        JPanel aiWrapper = styledPanel("Options IA", aiOptionsPanel);
+        inner.add(aiWrapper);
+        inner.add(Box.createVerticalStrut(35));
 
-        humanVsHuman.addActionListener(e -> aiOptionsPanel.setVisible(false));
-        humanVsAI.addActionListener(e -> aiOptionsPanel.setVisible(true));
+        humanVsHuman.addActionListener(e -> aiWrapper.setVisible(false));
+        humanVsAI.addActionListener(e -> aiWrapper.setVisible(true));
 
         // Bouton Commencer
-        JButton startBtn = btn("Commencer", ACCENT);
-        startBtn.setForeground(BG);
+        JButton startBtn = new RoundedButton("Commencer", ACCENT, BG);
         startBtn.setAlignmentX(CENTER_ALIGNMENT);
-        startBtn.setMaximumSize(new Dimension(200, 42));
+        startBtn.setMaximumSize(new Dimension(280, 50));
+        startBtn.setPreferredSize(new Dimension(280, 50));
         startBtn.addActionListener(e -> {
             if (listener != null) {
                 GameConfig config = new GameConfig(
@@ -120,56 +126,123 @@ public class ConfigPanel extends JPanel {
         this.listener = listener;
     }
 
-    private JPanel styledPanel(String t) {
-        JPanel p = new JPanel();
-        p.setBackground(PANEL_BG);
-        TitledBorder b = BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(new Color(80, 80, 100), 1, true), t);
-        b.setTitleFont(new Font("Segoe UI", Font.BOLD, 13));
-        b.setTitleColor(ACCENT);
-        p.setBorder(BorderFactory.createCompoundBorder(b, new EmptyBorder(8, 8, 8, 8)));
+    private JPanel styledPanel(String title, JComponent content) {
+        RoundedPanel p = new RoundedPanel(15, PANEL_BG);
+        p.setLayout(new BorderLayout());
+
+        JPanel header = new JPanel(new BorderLayout());
+        header.setOpaque(false);
+        header.setBorder(new EmptyBorder(10, 15, 10, 15));
+        
+        JLabel tLbl = new JLabel(title);
+        tLbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        tLbl.setForeground(ACCENT);
+        header.add(tLbl, BorderLayout.WEST);
+        
+        p.add(header, BorderLayout.NORTH);
+        
+        content.setOpaque(false);
+        p.add(content, BorderLayout.CENTER);
+        
         p.setAlignmentX(CENTER_ALIGNMENT);
-        p.setMaximumSize(new Dimension(450, 200));
+        p.setMaximumSize(new Dimension(500, 250));
         return p;
     }
 
     private JLabel lbl(String t) {
         JLabel l = new JLabel(t);
-        l.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        l.setForeground(TXT);
+        l.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        l.setForeground(TXT_MAIN);
         return l;
     }
 
     private JSpinner spinner(int v, int mn, int mx) {
         JSpinner s = new JSpinner(new SpinnerNumberModel(v, mn, mx, 1));
-        s.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        s.setPreferredSize(new Dimension(70, 28));
+        s.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        s.setPreferredSize(new Dimension(80, 32));
+        
+        JSpinner.DefaultEditor editor = (JSpinner.DefaultEditor) s.getEditor();
+        editor.getTextField().setBackground(BG);
+        editor.getTextField().setForeground(TXT_MAIN);
+        editor.getTextField().setBorder(BorderFactory.createEmptyBorder(2, 5, 2, 5));
         return s;
     }
 
     private JRadioButton radio(String t) {
         JRadioButton r = new JRadioButton(t);
-        r.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        r.setForeground(TXT);
+        r.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        r.setForeground(TXT_MAIN);
         r.setBackground(PANEL_BG);
         r.setFocusPainted(false);
+        r.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return r;
     }
 
-    private JButton btn(String t, Color bg) {
-        JButton b = new JButton(t);
-        b.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        b.setBackground(bg);
-        b.setForeground(TXT);
-        b.setFocusPainted(false);
-        b.setBorderPainted(false);
-        b.setPreferredSize(new Dimension(200, 42));
-        b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        Color h = bg.brighter();
-        b.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent e) { b.setBackground(h); }
-            public void mouseExited(java.awt.event.MouseEvent e) { b.setBackground(bg); }
-        });
-        return b;
+    private class RoundedPanel extends JPanel {
+        private int radius;
+        private Color bg;
+        
+        public RoundedPanel(int radius, Color bg) {
+            this.radius = radius;
+            this.bg = bg;
+            setOpaque(false);
+            setLayout(new BorderLayout());
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(bg);
+            g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, radius, radius);
+            g2.setColor(BORDER_C);
+            g2.setStroke(new BasicStroke(1.5f));
+            g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, radius, radius);
+            g2.dispose();
+            super.paintComponent(g);
+        }
+    }
+
+    private class RoundedButton extends JButton {
+        private Color bgColor, fgColor;
+        
+        public RoundedButton(String text, Color bg, Color fg) {
+            super(text);
+            this.bgColor = bg;
+            this.fgColor = fg;
+            setFont(new Font("Segoe UI", Font.BOLD, 18));
+            setForeground(fg);
+            setFocusPainted(false);
+            setBorderPainted(false);
+            setContentAreaFilled(false);
+            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            
+            addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseEntered(java.awt.event.MouseEvent e) { setBackground(ACCENT_HOVER); }
+                public void mouseExited(java.awt.event.MouseEvent e) { setBackground(bgColor); }
+            });
+        }
+        
+        @Override
+        public void setBackground(Color bg) {
+            this.bgColor = bg;
+            repaint();
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(bgColor);
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), getHeight(), getHeight());
+            
+            FontMetrics fm = g2.getFontMetrics();
+            int x = (getWidth() - fm.stringWidth(getText())) / 2;
+            int y = (getHeight() + fm.getAscent() - fm.getDescent()) / 2;
+            g2.setColor(fgColor);
+            g2.drawString(getText(), x, y);
+            
+            g2.dispose();
+        }
     }
 }

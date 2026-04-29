@@ -12,26 +12,29 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
-/**
- * Panneau de la grille de la Gaufre.
- * Les cases se redimensionnent dynamiquement.
- * Animation de destruction.
- */
 public class BoardPanel extends JPanel {
 
     private GaufreModel model;
-    private int padding = 5;
+    private int padding = 8;
     private int hoverRow = -1;
     private int hoverCol = -1;
 
-    private static final Color WAFFLE_COLOR = new Color(235, 195, 80);
-    private static final Color WAFFLE_DARK = new Color(200, 160, 50);
-    private static final Color WAFFLE_BORDER = new Color(180, 140, 40);
-    private static final Color POISON_COLOR = new Color(80, 180, 80);
-    private static final Color POISON_DARK = new Color(50, 140, 50);
-    private static final Color HIGHLIGHT_COLOR = new Color(255, 100, 100, 120);
-    private static final Color EATEN_COLOR = new Color(245, 240, 230);
-    private static final Color BOARD_BG = new Color(250, 245, 235);
+    // Premium Dark Theme Colors
+    private static final Color BOARD_BG = new Color(30, 30, 46); 
+    private static final Color EATEN_COLOR = new Color(49, 50, 68); 
+    private static final Color EATEN_BORDER = new Color(69, 71, 90, 80); 
+    
+    private static final Color WAFFLE_COLOR = new Color(249, 226, 175); 
+    private static final Color WAFFLE_DARK = new Color(230, 195, 120); 
+    private static final Color WAFFLE_BORDER = new Color(200, 160, 80);
+    private static final Color WAFFLE_GRID = new Color(200, 160, 80, 100);
+
+    private static final Color POISON_COLOR = new Color(166, 227, 161); 
+    private static final Color POISON_DARK = new Color(110, 180, 100);
+    private static final Color POISON_ICON = new Color(30, 50, 30);
+    
+    private static final Color HIGHLIGHT_BG = new Color(243, 139, 168, 70); 
+    private static final Color HIGHLIGHT_BORDER = new Color(243, 139, 168, 200); 
 
     private CellClickListener cellClickListener;
 
@@ -65,10 +68,7 @@ public class BoardPanel extends JPanel {
     }
 
     private static class Particle {
-        float x, y;
-        float vx, vy;
-        float size;
-        float alpha;
+        float x, y, vx, vy, size, alpha;
         Color color;
         long startTime;
         int duration;
@@ -95,23 +95,14 @@ public class BoardPanel extends JPanel {
 
         addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                handleClick(e);
-            }
-
+            public void mouseClicked(MouseEvent e) { handleClick(e); }
             @Override
-            public void mouseExited(MouseEvent e) {
-                hoverRow = -1;
-                hoverCol = -1;
-                repaint();
-            }
+            public void mouseExited(MouseEvent e) { hoverRow = -1; hoverCol = -1; repaint(); }
         });
 
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
-            public void mouseMoved(MouseEvent e) {
-                handleHover(e);
-            }
+            public void mouseMoved(MouseEvent e) { handleHover(e); }
         });
     }
 
@@ -130,48 +121,39 @@ public class BoardPanel extends JPanel {
 
     private int computeCellW() {
         if (model == null) return 80;
-        int w = getWidth();
+        int w = getWidth(), margin = 60;
         if (w <= 0) return 80;
-        int margin = 40;
-        int availW = w - margin;
-        int cw = (availW - padding * (model.getCols() - 1)) / model.getCols();
+        int cw = (w - margin - padding * (model.getCols() - 1)) / model.getCols();
         return Math.max(cw, 30);
     }
 
     private int computeCellH() {
         if (model == null) return 50;
-        int h = getHeight();
+        int h = getHeight(), margin = 60;
         if (h <= 0) return 50;
-        int margin = 40;
-        int availH = h - margin;
-        int ch = (availH - padding * (model.getRows() - 1)) / model.getRows();
+        int ch = (h - margin - padding * (model.getRows() - 1)) / model.getRows();
         return Math.max(ch, 20);
     }
 
     private int computeOffsetX(int cellW) {
-        if (model == null) return 20;
+        if (model == null) return 30;
         int totalW = model.getCols() * cellW + (model.getCols() - 1) * padding;
-        return Math.max(20, (getWidth() - totalW) / 2);
+        return Math.max(30, (getWidth() - totalW) / 2);
     }
 
     private int computeOffsetY(int cellH) {
-        if (model == null) return 20;
+        if (model == null) return 30;
         int totalH = model.getRows() * cellH + (model.getRows() - 1) * padding;
-        return Math.max(20, (getHeight() - totalH) / 2);
+        return Math.max(30, (getHeight() - totalH) / 2);
     }
 
     public void triggerDestructionAnimation(int clickRow, int clickCol, boolean[][] gridBefore) {
         if (model == null) return;
-        int rows = gridBefore.length;
-        int cols = gridBefore[0].length;
-
+        int rows = gridBefore.length, cols = gridBefore[0].length;
         long now = System.currentTimeMillis();
         animatingCells.clear();
-
-        int cellW = computeCellW();
-        int cellH = computeCellH();
-        int offsetX = computeOffsetX(cellW);
-        int offsetY = computeOffsetY(cellH);
+        int cellW = computeCellW(), cellH = computeCellH();
+        int offsetX = computeOffsetX(cellW), offsetY = computeOffsetY(cellH);
 
         for (int i = clickRow; i < rows; i++) {
             for (int j = clickCol; j < cols; j++) {
@@ -179,7 +161,6 @@ public class BoardPanel extends JPanel {
                     int dist = (i - clickRow) + (j - clickCol);
                     long delay = (long) dist * ANIM_CASCADE_DELAY;
                     animatingCells.add(new AnimatingCell(i, j, now + delay));
-
                     float cx = offsetX + j * (cellW + padding) + cellW / 2f;
                     float cy = offsetY + i * (cellH + padding) + cellH / 2f;
                     spawnParticles(cx, cy, cellW, cellH, now + delay + ANIM_CELL_DURATION / 2);
@@ -197,12 +178,12 @@ public class BoardPanel extends JPanel {
         int avgSize = (cellW + cellH) / 2;
         for (int p = 0; p < PARTICLE_COUNT; p++) {
             float angle = rng.nextFloat() * (float) (2 * Math.PI);
-            float speed = 1.5f + rng.nextFloat() * 3f;
+            float speed = 1.5f + rng.nextFloat() * 4f;
             float vx = (float) Math.cos(angle) * speed;
-            float vy = (float) Math.sin(angle) * speed - 1f;
-            float size = 3 + rng.nextFloat() * (avgSize / 8f);
+            float vy = (float) Math.sin(angle) * speed - 1.5f;
+            float size = 4 + rng.nextFloat() * (avgSize / 6f);
             Color color = rng.nextBoolean() ? WAFFLE_COLOR : WAFFLE_DARK;
-            int duration = 300 + rng.nextInt(300);
+            int duration = 400 + rng.nextInt(300);
             particles.add(new Particle(cx, cy, vx, vy, size, color, startTime, duration));
         }
     }
@@ -219,14 +200,10 @@ public class BoardPanel extends JPanel {
         Iterator<AnimatingCell> cellIt = animatingCells.iterator();
         while (cellIt.hasNext()) {
             AnimatingCell ac = cellIt.next();
-            if (now < ac.startTime) {
-                ac.progress = 0f;
-            } else {
+            if (now >= ac.startTime) {
                 float elapsed = now - ac.startTime;
                 ac.progress = Math.min(1f, elapsed / ANIM_CELL_DURATION);
-                if (ac.progress >= 1f) {
-                    cellIt.remove();
-                }
+                if (ac.progress >= 1f) cellIt.remove();
             }
         }
 
@@ -236,18 +213,14 @@ public class BoardPanel extends JPanel {
             if (now < pt.startTime) continue;
             float elapsed = now - pt.startTime;
             float t = elapsed / pt.duration;
-            if (t >= 1f) {
-                partIt.remove();
-                continue;
-            }
+            if (t >= 1f) { partIt.remove(); continue; }
             pt.x += pt.vx;
             pt.y += pt.vy;
-            pt.vy += 0.15f;
+            pt.vy += 0.2f; // Gravity
             pt.alpha = 1f - t;
         }
 
         repaint();
-
         if (animatingCells.isEmpty() && particles.isEmpty()) {
             animTimer.stop();
             animating = false;
@@ -275,10 +248,8 @@ public class BoardPanel extends JPanel {
     }
 
     private int[] getCellAt(int x, int y) {
-        int cellW = computeCellW();
-        int cellH = computeCellH();
-        int offsetX = computeOffsetX(cellW);
-        int offsetY = computeOffsetY(cellH);
+        int cellW = computeCellW(), cellH = computeCellH();
+        int offsetX = computeOffsetX(cellW), offsetY = computeOffsetY(cellH);
         for (int i = 0; i < model.getRows(); i++) {
             for (int j = 0; j < model.getCols(); j++) {
                 int cx = offsetX + j * (cellW + padding);
@@ -305,10 +276,8 @@ public class BoardPanel extends JPanel {
             return;
         }
 
-        int cellW = computeCellW();
-        int cellH = computeCellH();
-        int offsetX = computeOffsetX(cellW);
-        int offsetY = computeOffsetY(cellH);
+        int cellW = computeCellW(), cellH = computeCellH();
+        int offsetX = computeOffsetX(cellW), offsetY = computeOffsetY(cellH);
 
         for (int i = 0; i < model.getRows(); i++) {
             for (int j = 0; j < model.getCols(); j++) {
@@ -342,7 +311,7 @@ public class BoardPanel extends JPanel {
     }
 
     private void drawGameOverMessage(Graphics2D g2) {
-        g2.setFont(new Font("Segoe UI", Font.BOLD, 48));
+        g2.setFont(new Font("Segoe UI", Font.BOLD, 56));
         FontMetrics fm = g2.getFontMetrics();
         int textW = fm.stringWidth(gameOverMessage);
         int textH = fm.getAscent();
@@ -350,17 +319,15 @@ public class BoardPanel extends JPanel {
         int x = (getWidth() - textW) / 2;
         int y = (getHeight() + textH) / 2;
         
-        // Ombre portée
-        g2.setColor(new Color(200, 200, 200));
-        g2.drawString(gameOverMessage, x + 3, y + 3);
+        g2.setColor(new Color(17, 17, 27)); 
+        g2.drawString(gameOverMessage, x + 4, y + 4); 
         
-        // Couleur selon victoire/défaite
         if (gameOverMessage.toLowerCase().contains("gagn")) {
-            g2.setColor(new Color(80, 200, 80)); // Vert
+            g2.setColor(new Color(166, 227, 161));
         } else if (gameOverMessage.toLowerCase().contains("perdu") || gameOverMessage.toLowerCase().contains("ia")) {
-            g2.setColor(new Color(255, 80, 80)); // Rouge
+            g2.setColor(new Color(243, 139, 168));
         } else {
-            g2.setColor(WAFFLE_DARK);
+            g2.setColor(new Color(205, 214, 244)); 
         }
         g2.drawString(gameOverMessage, x, y);
     }
@@ -387,11 +354,9 @@ public class BoardPanel extends JPanel {
         }
 
         float t = ac.progress;
-        float easedT = t * t;
-
-        float scale = 1f - easedT;
-        float alpha = 1f - easedT;
-        float rotation = easedT * 0.3f;
+        float scale = 1f - t * t;
+        float alpha = 1f - t * t;
+        float rotation = t * 0.4f;
 
         if (scale <= 0.01f || alpha <= 0.01f) return;
 
@@ -419,35 +384,40 @@ public class BoardPanel extends JPanel {
             Graphics2D g2p = (Graphics2D) g2.create();
             g2p.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, Math.max(0f, Math.min(1f, pt.alpha))));
             g2p.setColor(pt.color);
-            int s = Math.max(1, (int) (pt.size * pt.alpha));
-            g2p.fillRoundRect((int) pt.x - s / 2, (int) pt.y - s / 2, s, s, 2, 2);
+            int s = Math.max(2, (int) (pt.size * pt.alpha));
+            g2p.fillRoundRect((int) pt.x - s / 2, (int) pt.y - s / 2, s, s, 3, 3);
             g2p.dispose();
         }
     }
 
-    // === Cell drawing ===
-
     private void drawWaffleCell(Graphics2D g2, int x, int y, int row, int col, int cellW, int cellH) {
-        int arcW = Math.max(4, cellW / 8);
-        int arcH = Math.max(4, cellH / 6);
+        int arcW = Math.max(8, cellW / 6);
+        int arcH = Math.max(8, cellH / 5);
         RoundRectangle2D.Float rect = new RoundRectangle2D.Float(x, y, cellW, cellH, arcW, arcH);
 
         if (row == 0 && col == 0) {
+            // Poison Piece
             GradientPaint gp = new GradientPaint(x, y, POISON_COLOR, x + cellW, y + cellH, POISON_DARK);
             g2.setPaint(gp);
             g2.fill(rect);
             g2.setColor(POISON_DARK.darker());
-            g2.setStroke(new BasicStroke(2));
+            g2.setStroke(new BasicStroke(3));
             g2.draw(rect);
 
-            g2.setColor(Color.WHITE);
-            int fontSize = Math.max(12, Math.min(cellW, cellH) * 2 / 3);
+            // Shadow / Inner
+            g2.setColor(new Color(255, 255, 255, 40));
+            g2.drawRoundRect(x + 2, y + 2, cellW - 4, cellH - 4, arcW - 2, arcH - 2);
+
+            // Icon
+            g2.setColor(POISON_ICON);
+            int fontSize = Math.max(14, Math.min(cellW, cellH) * 5 / 8);
             g2.setFont(new Font("Segoe UI", Font.BOLD, fontSize));
             FontMetrics fm = g2.getFontMetrics();
             String label = "X";
             int textX = x + (cellW - fm.stringWidth(label)) / 2;
             int textY = y + (cellH + fm.getAscent() - fm.getDescent()) / 2;
             g2.drawString(label, textX, textY);
+            
         } else {
             GradientPaint gp = new GradientPaint(x, y, WAFFLE_COLOR, x + cellW, y + cellH, WAFFLE_DARK);
             g2.setPaint(gp);
@@ -456,46 +426,59 @@ public class BoardPanel extends JPanel {
             g2.setStroke(new BasicStroke(2));
             g2.draw(rect);
 
-            // Waffle grid pattern
-            g2.setColor(new Color(WAFFLE_BORDER.getRed(), WAFFLE_BORDER.getGreen(), WAFFLE_BORDER.getBlue(), 60));
-            g2.setStroke(new BasicStroke(1));
-            int thirdW = cellW / 3;
-            int thirdH = cellH / 3;
-            int insetW = Math.max(3, cellW / 12);
-            int insetH = Math.max(3, cellH / 12);
-            // Vertical lines
-            g2.drawLine(x + thirdW, y + insetH, x + thirdW, y + cellH - insetH);
-            g2.drawLine(x + 2 * thirdW, y + insetH, x + 2 * thirdW, y + cellH - insetH);
-            // Horizontal lines
-            g2.drawLine(x + insetW, y + thirdH, x + cellW - insetW, y + thirdH);
-            g2.drawLine(x + insetW, y + 2 * thirdH, x + cellW - insetW, y + 2 * thirdH);
+            g2.setColor(new Color(255, 255, 255, 80));
+            g2.drawRoundRect(x + 2, y + 2, cellW - 4, cellH - 4, arcW - 2, arcH - 2);
+
+            g2.setColor(WAFFLE_GRID);
+            int dimpleW = cellW * 3 / 8;
+            int dimpleH = cellH * 3 / 8;
+            int spaceW = (cellW - 2 * dimpleW) / 3;
+            int spaceH = (cellH - 2 * dimpleH) / 3;
+            int dimpleArc = Math.max(4, dimpleW / 3);
+
+            for (int r = 0; r < 2; r++) {
+                for (int c = 0; c < 2; c++) {
+                    int dx = x + spaceW + c * (dimpleW + spaceW);
+                    int dy = y + spaceH + r * (dimpleH + spaceH);
+                    
+                    g2.setColor(new Color(210, 170, 90, 150));
+                    g2.fillRoundRect(dx, dy, dimpleW, dimpleH, dimpleArc, dimpleArc);
+                    
+                    g2.setColor(WAFFLE_BORDER);
+                    g2.setStroke(new BasicStroke(1.5f));
+                    g2.drawRoundRect(dx, dy, dimpleW, dimpleH, dimpleArc, dimpleArc);
+                }
+            }
         }
     }
 
     private void drawEatenCell(Graphics2D g2, int x, int y, int cellW, int cellH) {
-        int arcW = Math.max(4, cellW / 8);
-        int arcH = Math.max(4, cellH / 6);
+        int arcW = Math.max(8, cellW / 6);
+        int arcH = Math.max(8, cellH / 5);
         RoundRectangle2D.Float rect = new RoundRectangle2D.Float(x, y, cellW, cellH, arcW, arcH);
         g2.setColor(EATEN_COLOR);
         g2.fill(rect);
-        g2.setColor(new Color(220, 215, 205));
-        g2.setStroke(new BasicStroke(1, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1, new float[]{4, 4}, 0));
+        g2.setColor(EATEN_BORDER);
+        g2.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1, new float[]{6, 6}, 0));
         g2.draw(rect);
     }
 
     private void drawHoverHighlight(Graphics2D g2, int offsetX, int offsetY, int cellW, int cellH) {
-        int arcW = Math.max(4, cellW / 8);
-        int arcH = Math.max(4, cellH / 6);
+        int arcW = Math.max(8, cellW / 6);
+        int arcH = Math.max(8, cellH / 5);
+        
+        // Soft rounded clip/highlight for multiple cells
         for (int i = hoverRow; i < model.getRows(); i++) {
             for (int j = hoverCol; j < model.getCols(); j++) {
                 if (model.isCellPresent(i, j)) {
                     int x = offsetX + j * (cellW + padding);
                     int y = offsetY + i * (cellH + padding);
                     RoundRectangle2D.Float rect = new RoundRectangle2D.Float(x, y, cellW, cellH, arcW, arcH);
-                    g2.setColor(HIGHLIGHT_COLOR);
+                    
+                    g2.setColor(HIGHLIGHT_BG);
                     g2.fill(rect);
-                    g2.setColor(new Color(255, 80, 80, 180));
-                    g2.setStroke(new BasicStroke(2));
+                    g2.setColor(HIGHLIGHT_BORDER);
+                    g2.setStroke(new BasicStroke(2.5f));
                     g2.draw(rect);
                 }
             }
