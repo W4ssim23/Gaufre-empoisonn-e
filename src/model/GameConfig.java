@@ -30,7 +30,6 @@ public class GameConfig implements Serializable {
         this.aiPlayer = aiStarts ? 1 : 2;
     }
 
-    // Getters & Setters
 
     public int getRows() {
         return rows;

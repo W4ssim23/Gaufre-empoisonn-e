@@ -6,11 +6,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
-/**
- * Vue principale du jeu de la Gaufre Empoisonnée.
- * Utilise un CardLayout pour basculer entre le panneau de configuration
- * et le panneau de jeu dans la même fenêtre, sans fermeture/ouverture.
- */
+
 public class GaufreView extends JFrame implements GaufreModel.ModelListener {
 
     private CardLayout cardLayout;
@@ -36,7 +32,7 @@ public class GaufreView extends JFrame implements GaufreModel.ModelListener {
     private static final String CARD_GAME = "game";
 
     public GaufreView() {
-        super("Gaufre Empoisonnee - Chomp");
+        super("Gaufre Empoisonnee");
         initUI();
     }
 
@@ -151,7 +147,7 @@ public class GaufreView extends JFrame implements GaufreModel.ModelListener {
         return b;
     }
 
-    // === Navigation entre les cartes ===
+    // just so the navigation is more friendly and consistent
 
     public void showConfig() {
         cardLayout.show(cardPanel, CARD_CONFIG);
@@ -199,6 +195,11 @@ public class GaufreView extends JFrame implements GaufreModel.ModelListener {
             "Fin de Partie", JOptionPane.INFORMATION_MESSAGE);
     }
 
+
+
+
+    // interface section 
+
     @Override
     public void onModelChanged() {
         if (model != null && !model.isGameOver()) {
@@ -212,7 +213,7 @@ public class GaufreView extends JFrame implements GaufreModel.ModelListener {
             statusLabel.setText("Tour: " + name + " (J" + cp + ")");
             statusLabel.setForeground(cp == 1 ? P1_COLOR : P2_COLOR);
         }
-        boardPanel.repaint();
+        this.boardPanel.repaint();
     }
 
     @Override

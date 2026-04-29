@@ -2,10 +2,8 @@ package model;
 
 import java.io.Serializable;
 
-/**
- * Implémentation du pattern Command pour un coup dans la Gaufre.
- * Enregistre l'état du plateau avant le coup pour permettre l'annulation (Undo).
- */
+
+//allow to do/undo a Move
 public class MoveCommand implements Serializable {
     private static final long serialVersionUID = 1L;
 

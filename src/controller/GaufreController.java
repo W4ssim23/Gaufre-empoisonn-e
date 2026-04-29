@@ -7,11 +7,9 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 
-/**
- * Contrôleur principal du jeu de la Gaufre Empoisonnée (pattern MVC).
- * Orchestre les interactions entre le Modèle et la Vue.
- * Gère : coups, undo/redo, IA, sauvegarde/chargement, nouvelle partie.
- */
+
+
+
 public class GaufreController {
 
     private GaufreModel model;
@@ -116,10 +114,6 @@ public class GaufreController {
         updateButtonStates();
     }
 
-    /**
-     * Refait le dernier coup annulé (Redo).
-     * En mode IA, refait 2 coups.
-     */
     private void handleRedo() {
         if (aiThinking) return;
         if (!history.canRedo()) return;
@@ -207,3 +201,7 @@ public class GaufreController {
         view.setMoveCount(history.getMoveCount());
     }
 }
+
+
+
+// i might just go ahead and kill my self 
